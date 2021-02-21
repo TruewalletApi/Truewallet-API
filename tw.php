@@ -84,11 +84,11 @@ class TrueWallet {
         }
         if (isset($this->config["no_file"]) && $this->config["no_file"]) $this->config_path = null;
         if (!is_null($this->config_path)) file_put_contents($this->config_path, json_encode($this->config));
-        if (isset($this->config["username"]) && isset($this->config["password"]) && !isset($this->config["type"])) {
+        if (isset($this->config["phone"]) && isset($this->config["password"]) && !isset($this->config["type"])) {
             $this->updateConfig("type", "mobile");
         }
-        if ((!isset($this->config["no_file"]) || !$this->config["no_file"]) && is_null($this->config_path) && isset($this->config["username"])) {
-            $this->setConfigPath(dirname(__FILE__)."/".$this->config["username"].".identity", true, false);
+        if ((!isset($this->config["no_file"]) || !$this->config["no_file"]) && is_null($this->config_path) && isset($this->config["phone"])) {
+            $this->setConfigPath(dirname(__FILE__)."/".$this->config["phone"].".identity", true, false);
         }
         return $this->config;
     }
@@ -158,21 +158,21 @@ class TrueWallet {
     }
 
     public function RequestLoginOTP () {
-        if (!isset($this->config["username"]) || !isset($this->config["password"]) || !isset($this->config["type"])) return false;
+        if (!isset($this->config["phone"]) || !isset($this->config["password"]) || !isset($this->config["type"])) return false;
         $timestamp = $this->getTimestamp();
         $result = $this->request("GET", "/mobile-auth-service/v1/password/login/otp", array(
-            "username" => strval($this->config["username"]),
-            "password" => hash("sha256", hash("sha256", substr($timestamp, 4)).hash("sha256", strval($this->config["username"]).strval($this->config["password"]))),
+            "username" => strval($this->config["phone"]),
+            "password" => hash("sha256", hash("sha256", substr($timestamp, 4)).hash("sha256", strval($this->config["phone"]).strval($this->config["password"]))),
             "type" => strval($this->config["type"]),
             "timestamp" => $timestamp,
             "device_id" => strval($this->config["device_id"]),
-            "signature" => hash_hmac("sha1", implode("|", array(strval($this->config["username"]), hash("sha256", hash("sha256", substr($timestamp, 4)).hash("sha256", strval($this->config["username"]).strval($this->config["password"]))), strval($this->config["device_id"]), $timestamp)), "9LXAVCxcITaABNK48pAVgc4muuTNJ4enIKS5YzKyGZ"),
+            "signature" => hash_hmac("sha1", implode("|", array(strval($this->config["phone"]), hash("sha256", hash("sha256", substr($timestamp, 4)).hash("sha256", strval($this->config["phone"]).strval($this->config["password"]))), strval($this->config["device_id"]), $timestamp)), "9LXAVCxcITaABNK48pAVgc4muuTNJ4enIKS5YzKyGZ"),
         ));
         return $result;
     }
 
     public function SubmitLoginOTP ($otp_code, $mobile_number = null, $otp_reference = null) {
-        if (!isset($this->config["username"]) || !isset($this->config["password"]) || !isset($this->config["type"])) return false;
+        if (!isset($this->config["phone"]) || !isset($this->config["password"]) || !isset($this->config["type"])) return false;
         if (is_null($mobile_number) && isset($this->data["mobile_number"])) $mobile_number = $this->data["mobile_number"];
         if (is_null($otp_reference) && isset($this->data["otp_reference"])) $otp_reference = $this->data["otp_reference"];
         if (is_null($mobile_number) || is_null($otp_reference)) return false;
@@ -190,10 +190,10 @@ class TrueWallet {
             "model_number" => strval($this->config["device_model"]),
             "otp_code" => strval($otp_code),
             "otp_reference" => strval($otp_reference),
-            "password" => hash("sha256", hash("sha256", substr($timestamp, 4)).hash("sha256", strval($this->config["username"]).strval($this->config["password"]))),
+            "password" => hash("sha256", hash("sha256", substr($timestamp, 4)).hash("sha256", strval($this->config["phone"]).strval($this->config["password"]))),
             "timestamp" => $timestamp,
             "type" => strval($this->config["type"]),
-            "username" => strval($this->config["username"])
+            "username" => strval($this->config["phone"])
         ));
         if (isset($result["data"]["tmn_id"])) $this->updateConfig("tmn_id", $result["data"]["tmn_id"]);
         if (isset($result["data"]["access_token"])) $this->updateConfig("access_token", $result["data"]["access_token"]);
